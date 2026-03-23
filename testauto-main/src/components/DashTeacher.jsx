@@ -458,6 +458,16 @@ const DashTeacher = () => {
             >
               Research & Publications
             </button>
+            <button
+              className={`px-6 py-3 font-medium text-sm focus:outline-none ${
+                activeTab === "appointments"
+                  ? "border-b-2 border-blue-500 text-blue-700"
+                  : "text-gray-500 hover:text-blue-500"
+              }`}
+              onClick={() => setActiveTab("appointments")}
+            >
+              Student Appointments
+            </button>
           </div>
 
           <div className="p-6">
@@ -861,6 +871,57 @@ const DashTeacher = () => {
                       No research papers added yet. Add your publications above.
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+            
+            {/* Appointments Tab */}
+            {activeTab === "appointments" && (
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold mb-4 text-gray-700">
+                  Booked Student Appointments
+                </h2>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200 border">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date & Time</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roll No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {availableSlots.filter(s => s.status === "booked" && s.student).length > 0 ? (
+                        availableSlots.filter(s => s.status === "booked" && s.student).map((slot) => (
+                          <tr key={slot._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                              {formatSlotTime(slot.time)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-gray-900">{slot.student.firstName} {slot.student.lastName}</div>
+                              <div className="text-sm text-gray-500">{slot.student.email}</div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {slot.student.roll}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button onClick={() => handleDeleteSlot(slot._id)} className="text-red-600 hover:text-red-900 border border-red-200 px-3 py-1 rounded bg-red-50 transition-colors">
+                                Cancel Session
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="px-6 py-8 text-center text-sm text-gray-500">
+                            No students have booked appointments yet.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

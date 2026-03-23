@@ -50,28 +50,21 @@
 //   );
 // }
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Signup from "./components/Sign";
 import Login from "./components/Login";
 import Hero from "./components/Hero";
 import DashTeacher from "./components/DashTeacher";
+
 export default function App() {
   return (
-  //   <div className="App">
-  //   <Hero />
-  // </div>
-  <div>
-    <Hero />
-  </div>
-    
-    // <BrowserRouter>
-    //   <Routes>
-    //     {/* Directly render Signup component at root path */}
-    //     <Route path="/dash" element={<Hero />} />
-    //     <Route path="/signup" element={<Sign />} />
-    //     <Route path="/login" element={<Login />} />
-    //   </Routes>
-    // </BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/dash" element={<Hero />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/teacher_dashboard" element={<DashTeacher />} />
+    </Routes>
   );
 }
 

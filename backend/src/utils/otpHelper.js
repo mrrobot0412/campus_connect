@@ -10,7 +10,7 @@ const sendOtp = async ({ email, otp }, res) => {
       port: 465,
       secure: false,
       auth: {
-        user: "pushanag@gmail.com",
+        user: process.env.gmail_user,
         pass: process.env.gmail_key,
       },
       // type: "login",

@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const Student = require("../../models/student")
 const Teacher = require("../../models/teachers")
-const {JWT_SECRET} = require("../../config/server-config")
+const { JWT_SECRET } = require("../../config/server-config")
 
 
 
@@ -28,7 +28,7 @@ const {JWT_SECRET} = require("../../config/server-config")
 //   // loginAuth, 
 //   async function name(req,res) {
 //     const department = req.query.department;
-    
+
 //     try{
 //       const query = department ? { department: department } : {};
 //       const allteachers = await Teacher.find(query);
@@ -44,7 +44,10 @@ const {JWT_SECRET} = require("../../config/server-config")
 
 router.get("/profile", loginAuth, async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.user.userId).select("-password");
+    const teacher = await Teacher.findById(req.user.userId)
+      .select("-password")
+      .populate("slots.student", "firstName lastName email roll");
+      
     if (!teacher) return res.status(404).json({ message: "Teacher not found" });
 
     res.json({ teacher });
@@ -89,23 +92,20 @@ router.get("/getTeachers", async (req, res) => {
   const { department, search } = req.query;
   let query = {};
 
-  // if (department) query.department = department;
-  // if (search) {
-  //   query.$text = { $search: search };
-  // }
+  if (department) query.department = department;
 
   if (search) {
+    // Allows matching "Alice Smith" or single names case-insensitively
+    const searchRegex = new RegExp(search.split(' ').join('.*'), 'i');
     query.$or = [
-      { firstName: { $regex: search, $options: "i" } },
-      { lastName: { $regex: search, $options: "i" } },
+      { firstName: searchRegex },
+      { lastName: searchRegex },
+      { $expr: { $regexMatch: { input: { $concat: ["$firstName", " ", "$lastName"] }, regex: search, options: "i" } } }
     ];
   }
-  console.log(query);
 
   try {
     const teachers = await Teacher.find(query);
-    console.log({ query, teachers });
-
     res.json({ teachers });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
@@ -419,7 +419,7 @@ router.post("/addManyTeachers", async (req, res) => {
       details: err.message || err,
     });
   }
-});module.exports = router;
+}); module.exports = router;
 
 router.post(
   "/addTeacher",
@@ -470,15 +470,19 @@ router.post(
 );
 router.get(
   "/searchByPaper",
-
   async (req, res) => {
     const { q, department } = req.query;
-var query ={}
+    let query = {};
+
+    if (department) {
+      query.department = department;
+    }
+
     try {
       if (q) {
-        query.$text = { $search: q };
+        // Use regex instead of $text to avoid crashing if text index is missing
+        query["papers.title"] = { $regex: q, $options: "i" };
       }
-    console.log(query)
 
       const teachers = await Teacher.find(query);
       res.json({ teachers });
@@ -487,5 +491,24 @@ var query ={}
     }
   }
 );
+
+router.get("/searchByAvailability", async (req, res) => {
+  const { date, department } = req.query;
+
+  // Find any teacher who has slots where status is available
+  let query = { "slots.status": "available" };
+
+  if (department) {
+    query.department = department;
+  }
+
+  try {
+    const teachers = await Teacher.find(query);
+    res.json({ teachers });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router

@@ -6,15 +6,12 @@ import { Link } from "react-router-dom";
 
 export default function Login() {
   const navigate = useNavigate();
-  if(localStorage.getItem("auth-token")){
-    console.log("hi")
-    navigate("/")
-  }
-   useEffect(()=>{
-      if(localStorage.getItem("auth-token")){
-        navigate("/")
-        }
-    },[localStorage])
+  
+  useEffect(() => {
+    if (localStorage.getItem("auth-token")) {
+      navigate("/dash");
+    }
+  }, [navigate]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -64,16 +61,16 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-cyan-100 selection:text-cyan-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-blue-100 selection:text-blue-900">
       {/* Background soft blobs for a modern feel */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-cyan-200/30 blur-3xl"></div>
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-indigo-200/30 blur-3xl"></div>
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-3xl"></div>
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-slate-200/30 blur-3xl"></div>
       </div>
       
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md space-y-6 transition-all duration-300 hover:shadow-cyan-100/50"
+        className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md space-y-6 transition-all duration-300 hover:shadow-blue-100/50"
       >
         <div className="text-center space-y-2 mb-8">
           <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome back</h2>
@@ -112,7 +109,7 @@ export default function Login() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
               required
             />
           </div>
@@ -122,7 +119,7 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
               required
             />
           </div>
@@ -131,7 +128,7 @@ export default function Login() {
         <div className="flex items-center justify-between pt-2">
           <p className="text-sm text-slate-500 font-medium">
             New here?{" "}
-            <Link to="/signup" className="text-cyan-600 font-bold hover:text-cyan-700 transition-colors">
+            <Link to="/signup" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
               Register
             </Link>
           </p>

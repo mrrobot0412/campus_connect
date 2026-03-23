@@ -110,13 +110,13 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-cyan-100 selection:text-cyan-900">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-blue-100 selection:text-blue-900">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-cyan-200/30 blur-3xl"></div>
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-indigo-200/30 blur-3xl"></div>
+        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-3xl"></div>
+        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-slate-200/30 blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md transition-all duration-300 hover:shadow-cyan-100/50">
+      <div className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md transition-all duration-300 hover:shadow-blue-100/50">
         {otpVerfifed ? (
           verifyotp ? (
             <form onSubmit={handleEmail} className="space-y-6">
@@ -133,7 +133,7 @@ export default function Signup() {
                   placeholder="Your Email Address"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
                   required
                 />
               </div>
@@ -144,7 +144,7 @@ export default function Signup() {
 
               <p className="text-center text-sm text-slate-500 font-medium">
                 Already have an account?{' '}
-                <Link to="/login" className="text-cyan-600 font-bold hover:text-cyan-700 transition-colors">Sign in</Link>
+                <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
               </p>
             </form>
           ) : (
@@ -162,7 +162,7 @@ export default function Signup() {
                   placeholder="Enter 6-digit OTP"
                   value={formData.otp}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
                   required
                 />
               </div>
@@ -173,7 +173,7 @@ export default function Signup() {
 
               <p className="text-center text-sm text-slate-500 font-medium">
                 Already have an account?{' '}
-                <Link to="/login" className="text-cyan-600 font-bold hover:text-cyan-700 transition-colors">Sign in</Link>
+                <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
               </p>
             </form>
           )
@@ -193,7 +193,7 @@ export default function Signup() {
                   placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
+                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
                   required
                 />
               </div>
@@ -205,7 +205,7 @@ export default function Signup() {
                   placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
+                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
                   required
                 />
               </div>
@@ -232,7 +232,7 @@ export default function Signup() {
                 placeholder="Roll Number"
                 value={formData.rollNo}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
                 required
               />
             </div>
@@ -245,7 +245,7 @@ export default function Signup() {
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
                 required
               />
             </div>
@@ -258,7 +258,7 @@ export default function Signup() {
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:border-cyan-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
                 required
               />
             </div>
@@ -269,7 +269,7 @@ export default function Signup() {
 
             <p className="text-center text-sm text-slate-500 font-medium mt-4">
               Already have an account?{' '}
-              <Link to="/login" className="text-cyan-600 font-bold hover:text-cyan-700 transition-colors">Sign in</Link>
+              <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
             </p>
           </form>
         )}
