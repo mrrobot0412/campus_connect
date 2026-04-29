@@ -1,90 +1,75 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"
-import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-
+import {API_BASE_URL} from "../config"; 
 
 export default function Login() {
   const navigate = useNavigate();
-  
+
   useEffect(() => {
     if (localStorage.getItem("auth-token")) {
       navigate("/dash");
     }
   }, [navigate]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const [userType, setUserType] = useState("studentLogin");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(email);
-    console.log(password);
-    console.log({ email, password, rememberMe, userType });
-    let data = JSON.stringify({
-      email: email,
-      password: password,
-      userType: userType,
-    });
-    let config = {
-      method: "post",
-      maxBodyLength: Infinity,
-      url: `http://localhost:8000/api/v1/loginRoutes/${userType}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      data: data,
-    };
+    const url = `${API_BASE_URL}/api/v1/loginRoutes/${userType}`;
 
-    axios
-      .request(config)
-      .then((response) => {
-        console.log(JSON.stringify(response.data));
-        localStorage.setItem("auth-token", response.data.token);
-        if (userType == "studentLogin") {
-          navigate("/");
-        } else {
-          navigate("/teacher_dashboard");
-        }
-      })
-      .catch((error) => {
-        if (error.response.data.message == "User not found") {
-          alert("USER NOT FOUND");
-        }
+    try {
+      const response = await axios.post(
+        url,
+        { email, password },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-        if (error.response.request.status == 400) {
-          alert("Invalid credentials");
-        }
-        console.log(error.response);
-      });
+      localStorage.setItem("auth-token", response.data.token);
+
+      if (userType === "studentLogin") {
+        navigate("/dash");
+      } else {
+        navigate("/teacher_dashboard");
+      }
+    } catch (error) {
+      if (error.response?.data?.message === "User not found") {
+        alert("USER NOT FOUND");
+      } else if (error.response?.status === 400) {
+        alert("Invalid credentials");
+      } else {
+        alert("Something went wrong. Please try again.");
+      }
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-blue-100 selection:text-blue-900">
-      {/* Background soft blobs for a modern feel */}
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-3xl"></div>
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-slate-200/30 blur-3xl"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-br from-indigo-200/40 to-purple-200/40 blur-3xl opacity-50 mix-blend-multiply"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-tl from-sky-200/40 to-blue-200/40 blur-3xl opacity-50 mix-blend-multiply"></div>
       </div>
-      
+
       <form
         onSubmit={handleSubmit}
-        className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md space-y-6 transition-all duration-300 hover:shadow-blue-100/50"
+        className="relative z-10 bg-white/80 backdrop-blur-2xl p-8 sm:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 w-full max-w-md space-y-8 transition-all duration-500 hover:shadow-[0_8px_30pxrgb(0,0,0,0.08)]"
       >
-        <div className="text-center space-y-2 mb-8">
-          <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Welcome back</h2>
-          <p className="text-slate-500 text-sm font-medium">Please enter your details to sign in.</p>
+        <div className="text-center space-y-3 mb-8">
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Campus Connect</h2>
+          <p className="text-slate-500 text-sm font-medium px-4">Log in to manage your appointments and schedule effortlessly.</p>
         </div>
 
-        <div className="flex p-1 bg-slate-100/80 rounded-xl mb-6">
+        <div className="flex p-1.5 bg-slate-100/80 rounded-2xl mb-6">
           <button
             type="button"
             onClick={() => setUserType("studentLogin")}
-            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              userType === "studentLogin" 
-                ? "bg-white text-slate-900 shadow-sm" 
-                : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+              userType === "studentLogin"
+                ? "bg-white text-indigo-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
             }`}
           >
             Student
@@ -92,59 +77,59 @@ export default function Login() {
           <button
             type="button"
             onClick={() => setUserType("teacherLogin")}
-            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-200 ${
-              userType === "teacherLogin" 
-                ? "bg-white text-slate-900 shadow-sm" 
-                : "text-slate-500 hover:text-slate-800"
+            className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${
+              userType === "teacherLogin"
+                ? "bg-white text-indigo-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
             }`}
           >
             Teacher
           </button>
         </div>
 
-        <div className="space-y-4">
-          <div>
+        <div className="space-y-5">
+          <div className="group">
             <input
               type="email"
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium"
               required
             />
           </div>
-          <div>
+          <div className="group">
             <input
               type="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium"
               required
             />
           </div>
         </div>
 
         <div className="flex items-center justify-between pt-2">
-          <p className="text-sm text-slate-500 font-medium">
+          <p className="text-sm text-slate-500 font-medium tracking-wide">
             New here?{" "}
-            <Link to="/signup" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">
-              Register
+            <Link to="/signup" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">
+              Request access
             </Link>
           </p>
-          <button
-            type="button"
+          <Link
+            to="/forgot-password"
             className="text-sm text-slate-400 font-medium hover:text-slate-700 transition-colors"
           >
             Forgot password?
-          </button>
+          </Link>
         </div>
 
         <button
           type="submit"
-          className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-slate-900/20 transform hover:-translate-y-0.5 transition-all duration-200"
+          className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-900/20 transform hover:-translate-y-1 transition-all duration-300"
         >
-          Sign In
+          Sign In to Portal
         </button>
       </form>
     </div>

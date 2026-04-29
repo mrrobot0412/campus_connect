@@ -277,6 +277,7 @@ router.get("/getTeachersByDept", async (req, res) => {
 // Add new teacher
 router.post(
   "/addTeacher",
+  loginAuth,
   [
     body("firstName")
       .isString()
@@ -409,7 +410,7 @@ router.post("/addManyTeachers", async (req, res) => {
     }
 
     const insertedTeachers = await Teacher.insertMany(teachers, {
-      ordered: false, // allows continuing on duplicate errors
+      ordered: false,
     });
 
     res.status(201).json({ message: "Teachers added", insertedTeachers });
@@ -419,83 +420,31 @@ router.post("/addManyTeachers", async (req, res) => {
       details: err.message || err,
     });
   }
-}); module.exports = router;
+});
 
-router.post(
-  "/addTeacher",
-  [
-    body("firstName")
-      .isString()
-      .notEmpty()
-      .withMessage("First name is required"),
-    body("lastName").isString().notEmpty().withMessage("Last name is required"),
-    body("email").isEmail().withMessage("Invalid email format"),
-    body("department").isIn(["CSED", "ECED"]).withMessage("Invalid department"),
-    body("roomNumber")
-      .isString()
-      .notEmpty()
-      .withMessage("Room number is required"),
-  ],
-  async function (req, res) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+router.get("/searchByPaper", async (req, res) => {
+  const { q, department } = req.query;
+  let query = {};
 
-    const { firstName, lastName, email, department, roomNumber } = req.body;
-
-    try {
-      // Check if email already exists
-      const existingTeacher = await Teacher.findOne({ email });
-      if (existingTeacher) {
-        return res.status(400).json({ message: "Email already in use" });
-      }
-      const teacher = new Teacher({
-        firstName,
-        lastName,
-        email,
-        department,
-        roomNumber,
-      });
-      await teacher.save();
-
-      return res
-        .status(201)
-        .json({ message: "Teacher added successfully", teacher });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Server error" });
-    }
+  if (department) {
+    query.department = department;
   }
-);
-router.get(
-  "/searchByPaper",
-  async (req, res) => {
-    const { q, department } = req.query;
-    let query = {};
 
-    if (department) {
-      query.department = department;
+  try {
+    if (q) {
+      query["papers.title"] = { $regex: q, $options: "i" };
     }
 
-    try {
-      if (q) {
-        // Use regex instead of $text to avoid crashing if text index is missing
-        query["papers.title"] = { $regex: q, $options: "i" };
-      }
-
-      const teachers = await Teacher.find(query);
-      res.json({ teachers });
-    } catch (err) {
-      res.status(500).json({ error: "Server error" });
-    }
+    const teachers = await Teacher.find(query);
+    res.json({ teachers });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
-);
+});
 
 router.get("/searchByAvailability", async (req, res) => {
   const { date, department } = req.query;
 
-  // Find any teacher who has slots where status is available
   let query = { "slots.status": "available" };
 
   if (department) {
@@ -511,4 +460,4 @@ router.get("/searchByAvailability", async (req, res) => {
   }
 });
 
-module.exports = router
+module.exports = router;

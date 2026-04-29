@@ -110,166 +110,166 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 font-sans selection:bg-blue-100 selection:text-blue-900">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-sky-50 p-4 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-blue-200/30 blur-3xl"></div>
-        <div className="absolute top-[60%] -right-[10%] w-[40%] h-[60%] rounded-full bg-slate-200/30 blur-3xl"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-br from-indigo-200/40 to-purple-200/40 blur-3xl opacity-50 mix-blend-multiply"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-tl from-sky-200/40 to-blue-200/40 blur-3xl opacity-50 mix-blend-multiply"></div>
       </div>
 
-      <div className="relative z-10 bg-white/70 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-2xl shadow-slate-200/50 border border-white w-full max-w-md transition-all duration-300 hover:shadow-blue-100/50">
+      <div className="relative z-10 bg-white/80 backdrop-blur-2xl p-8 sm:p-12 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 w-full max-w-md transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         {otpVerfifed ? (
           verifyotp ? (
             <form onSubmit={handleEmail} className="space-y-6">
-              <div className="text-center space-y-2 mb-8">
-                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Register</h2>
+              <div className="text-center space-y-3 mb-8">
+                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Register</h2>
                 <p className="text-slate-500 text-sm font-medium">Enter your email to get started.</p>
               </div>
 
-              <div className="relative">
-                <FiMail className="absolute top-4 left-4 text-slate-400" />
+              <div className="relative group">
+                <FiMail className="absolute top-1/2 -translate-y-1/2 left-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                 <input
                   type="email"
                   name="email"
                   placeholder="Your Email Address"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                  className="w-full pl-14 pr-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium"
                   required
                 />
               </div>
 
-              <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-slate-900/20 transform hover:-translate-y-0.5 transition-all duration-200">
+              <button type="submit" className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-900/20 transform hover:-translate-y-1 transition-all duration-300">
                 Send OTP
               </button>
 
-              <p className="text-center text-sm text-slate-500 font-medium">
+              <p className="text-center text-sm text-slate-500 font-medium tracking-wide">
                 Already have an account?{' '}
-                <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
+                <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
               </p>
             </form>
           ) : (
             <form onSubmit={handleOtp} className="space-y-6">
-              <div className="text-center space-y-2 mb-8">
-                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Enter OTP</h2>
-                <p className="text-slate-500 text-sm font-medium">Check your email for the code we sent.</p>
+              <div className="text-center space-y-3 mb-8">
+                <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Verify Secure Code</h2>
+                <p className="text-slate-500 text-sm font-medium px-4">Check your email for the 6-digit code we sent you.</p>
               </div>
 
-              <div className="relative">
-                <FiLock className="absolute top-4 left-4 text-slate-400" />
+              <div className="relative group">
+                <FiLock className="absolute top-1/2 -translate-y-1/2 left-5 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={20} />
                 <input
                   type="text"
                   name="otp"
                   placeholder="Enter 6-digit OTP"
                   value={formData.otp}
                   onChange={handleChange}
-                  className="w-full pl-12 pr-5 py-3.5 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                  className="w-full pl-14 pr-5 py-4 bg-slate-50 border border-slate-200/80 rounded-2xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium tracking-widest text-lg"
                   required
                 />
               </div>
 
-              <button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-slate-900/20 transform hover:-translate-y-0.5 transition-all duration-200">
-                Verify OTP
+              <button type="submit" className="w-full bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg shadow-indigo-900/20 transform hover:-translate-y-1 transition-all duration-300">
+                Verify Identity
               </button>
 
-              <p className="text-center text-sm text-slate-500 font-medium">
+              <p className="text-center text-sm text-slate-500 font-medium tracking-wide">
                 Already have an account?{' '}
-                <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
+                <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
               </p>
             </form>
           )
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="text-center space-y-2 mb-6">
-              <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">Complete Profile</h2>
-              <p className="text-slate-500 text-sm font-medium">Almost there! Complete your details.</p>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="text-center space-y-3 mb-8">
+              <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Complete Profile</h2>
+              <p className="text-slate-500 text-sm font-medium">Almost there! We just need a few more details.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="relative">
-                <FiUser className="absolute top-4 left-4 text-slate-400" />
+              <div className="relative group">
+                <FiUser className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                 <input
                   type="text"
                   name="firstName"
                   placeholder="First Name"
                   value={formData.firstName}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium text-sm"
                   required
                 />
               </div>
-              <div className="relative">
-                <FiUser className="absolute top-4 left-4 text-slate-400" />
+              <div className="relative group">
+                <FiUser className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
                 <input
                   type="text"
                   name="lastName"
                   placeholder="Last Name"
                   value={formData.lastName}
                   onChange={handleChange}
-                  className="w-full pl-11 pr-3 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium text-sm"
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium text-sm"
                   required
                 />
               </div>
             </div>
 
             <div className="relative">
-              <FiMail className="absolute top-4 left-4 text-slate-400" />
+              <FiMail className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400" size={18} />
               <input
                 type="email"
                 name="email"
                 placeholder="Email Address"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-slate-100/50 border border-slate-200 rounded-xl text-slate-500 cursor-not-allowed font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-100/60 border border-slate-200/50 rounded-xl text-slate-500 cursor-not-allowed font-medium text-sm opacity-80"
                 readOnly
               />
             </div>
 
-            <div className="relative">
-              <FiUser className="absolute top-4 left-4 text-slate-400" />
+            <div className="relative group">
+              <FiUser className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input
                 type="text"
                 name="rollNo"
                 placeholder="Roll Number"
                 value={formData.rollNo}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium text-sm"
                 required
               />
             </div>
 
-            <div className="relative">
-              <FiLock className="absolute top-4 left-4 text-slate-400" />
+            <div className="relative group">
+              <FiLock className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input
                 type="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium text-sm"
                 required
               />
             </div>
 
-            <div className="relative">
-              <FiLock className="absolute top-4 left-4 text-slate-400" />
+            <div className="relative group">
+              <FiLock className="absolute top-1/2 -translate-y-1/2 left-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input
                 type="password"
                 name="confirmPassword"
                 placeholder="Confirm Password"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full pl-12 pr-5 py-3 bg-white/60 border border-slate-200 rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all duration-200 placeholder-slate-400 font-medium"
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all duration-300 placeholder-slate-400 font-medium text-sm"
                 required
               />
             </div>
 
-            <button type="submit" className="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-4 rounded-xl shadow-lg shadow-slate-900/20 transform hover:-translate-y-0.5 transition-all duration-200">
-              Complete Registration
+            <button type="submit" className="w-full mt-4 bg-slate-900 hover:bg-indigo-600 text-white font-bold py-4 px-4 rounded-xl shadow-lg shadow-indigo-900/20 transform hover:-translate-y-1 transition-all duration-300">
+              Create Account
             </button>
 
-            <p className="text-center text-sm text-slate-500 font-medium mt-4">
+            <p className="text-center text-sm text-slate-500 font-medium mt-6 tracking-wide">
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition-colors">Sign in</Link>
+              <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
             </p>
           </form>
         )}
