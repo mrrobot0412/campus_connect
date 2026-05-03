@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { FiUser, FiLock, FiMail } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import axios from "axios"
-import { useNavigate } from `react-router-dom`;
+import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -29,12 +30,12 @@ export default function Signup() {
       return;
     }
     let config = {
-      method: `post`,
+      method: "post",
       maxBodyLength: Infinity,
       url: `${API_BASE_URL}/api/v1/loginRoutes/registerStudent`,
       headers: { 
-        `auth-token`: token, 
-        `Content-Type`: `application/json`
+        "auth-token": token, 
+        "Content-Type": "application/json"
       },
       data : data
     };
@@ -59,11 +60,11 @@ export default function Signup() {
       "email": formData.email
     });
     let config = {
-      method: `post`,
+      method: "post",
       maxBodyLength: Infinity,
       url: `${API_BASE_URL}/api/v1/otp/generateOTP`,
       headers: { 
-        `Content-Type`: `application/json`
+        "Content-Type": "application/json"
       },
       data : data
     };
@@ -87,12 +88,12 @@ export default function Signup() {
       "otp": formData.otp
     });
     let config = {
-      method: `post`,
+      method: "post",
       maxBodyLength: Infinity,
       url: `${API_BASE_URL}/api/v1/otp/verifyotp`,
       headers: { 
-        `auth-token`: token, 
-        `Content-Type`: `application/json`, 
+        "auth-token": token, 
+        "Content-Type": "application/json", 
        
       },
     data:data}
@@ -143,7 +144,7 @@ export default function Signup() {
               </button>
 
               <p className="text-center text-sm text-slate-500 font-medium tracking-wide">
-                Already have an account?{` `}
+                Already have an account?{" "}
                 <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
               </p>
             </form>
@@ -172,7 +173,7 @@ export default function Signup() {
               </button>
 
               <p className="text-center text-sm text-slate-500 font-medium tracking-wide">
-                Already have an account?{` `}
+                Already have an account?{" "}
                 <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
               </p>
             </form>
@@ -268,15 +269,9 @@ export default function Signup() {
             </button>
 
             <p className="text-center text-sm text-slate-500 font-medium mt-6 tracking-wide">
-              Already have an account?{` `}
+              Already have an account?{" "}
               <Link to="/login" className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors">Sign in</Link>
             </p>
-          </form>
-        )}
-      </div>
-    </div>
-  );
-}
           </form>
         )}
       </div>
