@@ -7,7 +7,7 @@ var jwt = require("jsonwebtoken");
 const Student = require("../../models/student")
 const Teacher = require("../../models/teachers")
 // const Slots = require("../../models/Slots")
-const {JWT_SECRET} = require("../../config/server-config")
+const { JWT_SECRET } = require("../../config/server-config")
 
 const mongoose = require('mongoose');
 
@@ -27,143 +27,113 @@ async function insertSlotIfTimeIsFree(id, time, status) {
 
 
 
-router.post("/bookSlots",loginAuth,
-    async function(req,res){
-     
-
-        try {
-        var id = req.user.userId
-        var slotId = req.body.slotId
-        var teacherId = req.body.teacherId
-        // console.log(req.slotId)
-            // Check if email already exists
-            const existingTeacher = await Student.findOne({ _id:id });
-            if (!existingTeacher) {
-              return res.status(400).json({ message: 'NO such student' });
-            }
-            // console.log(existingTeacher)
-            const result = await Teacher.aggregate([
-                // Match the teacher with this slot
-                { $match: { _id: new mongoose.Types.ObjectId(teacherId) } },
-                { $unwind: "$slots" },
-                { $match: { "slots._id": new mongoose.Types.ObjectId(slotId) } },
-                {
-                  $facet: {
-                    slotToBook: [
-                      { $project: { time: "$slots.time" } }
-                    ],
-                    alreadyBooked: [
-                      {
-                        $lookup: {
-                          from: "teachers",
-                          let: { slotTime: "$slots.time" },
-                          pipeline: [
-                            { $unwind: "$slots" },
-                            {
-                              $match: {
-                                $expr: {
-                                  $and: [
-                                    { $eq: ["$slots.time", "$$slotTime"] },
-                                    { $eq: ["$slots.bookedBy", new mongoose.Types.ObjectId(id)] }
-                                  ]
-                                }
-                              }
-                            }
-                          ],
-                          as: "conflict"
-                        }
-                      },
-                      { $project: { conflict: 1 } }
-                    ]
-                  }
-                }
-              ]);
-if(result[0].conflict?.length > 0 ){ return  res.status(400).json({ message: 'alreay booked slot for same timing' });}              
-    
-            // Concurrent lock: only update if the slot is currently 'available'
-            const update = await Teacher.updateOne(
-                { _id: teacherId, "slots._id": slotId, "slots.status": "available" },
-                {
-                  $set: {
-                    "slots.$.student": id,
-                    "slots.$.status": "booked"
-                  }
-                }
-            );
-              
-            if (update.modifiedCount === 0) {
-              return res.status(400).json({ message: 'Slot is no longer available or invalid' });
-            }
-
-            return res.status(201).json({ message: 'Slot booked successfully' });
-          } catch (error) {
-            console.error(error);
-            return res.status(500).json({ message: 'Server error' });
-          }
-})
+router.post("/bookSlots", loginAuth,
+  async function (req, res) {
 
 
-
-
-router.get("/retriveSlots", loginAuth, async function(req, res) {
     try {
-        var id = req.user.userId;
-        const existingStudent = await Student.findOne({ _id: id });
-        
-        if (!existingStudent) {
-            return res.status(400).json({ message: 'No such student' });
-        }
+      var id = req.user.userId
+      var slotId = req.body.slotId
+      var teacherId = req.body.teacherId
+      // console.log(req.slotId)
+      // Check if email already exists
+      const existingTeacher = await Student.findOne({ _id: id });
+      if (!existingTeacher) {
+        return res.status(400).json({ message: 'NO such student' });
+      }
+      // console.log(existingTeacher)
+      // Atomic findOneAndUpdate: checks and updates in a single operation
+      // Only succeeds if slot exists AND is available — prevents double booking
+      const result = await Teacher.findOneAndUpdate(
+        {
+          _id: teacherId,
+          "slots._id": new mongoose.Types.ObjectId(slotId),
+          "slots.status": "available"
+        },
+        {
+          $set: {
+            "slots.$.student": id,
+            "slots.$.status": "booked"
+          }
+        },
+        { new: true }
+      );
 
-        // Use aggregation to flatten the slots array and return only the slots belonging to this student
-        const bookedSlots = await Teacher.aggregate([
-            { $match: { "slots.student": new mongoose.Types.ObjectId(id) } },
-            { $unwind: "$slots" },
-            { $match: { "slots.student": new mongoose.Types.ObjectId(id) } },
-            { $project: {
-                teacherId: "$_id",
-                firstName: 1, 
-                lastName: 1, 
-                department: 1, 
-                roomNumber: 1,
-                slotId: "$slots._id", 
-                time: "$slots.time", 
-                status: "$slots.status"
-            }},
-            { $sort: { time: 1 } }
-        ]);
+      if (!result) {
+        return res.status(400).json({ message: 'Slot is no longer available or invalid' });
+      }
 
-        return res.status(200).json({ bookedSlots });
+      return res.status(201).json({ message: 'Slot booked successfully' });
     } catch (error) {
-        console.error(error);
-        return res.status(500).json({ message: 'Server error' });
+      console.error(error);
+      return res.status(500).json({ message: 'Server error' });
     }
+  })
+
+
+
+
+router.get("/retriveSlots", loginAuth, async function (req, res) {
+  try {
+    var id = req.user.userId;
+    const existingStudent = await Student.findOne({ _id: id });
+
+    if (!existingStudent) {
+      return res.status(400).json({ message: 'No such student' });
+    }
+
+    // Use aggregation to flatten the slots array and return only the slots belonging to this student
+    const bookedSlots = await Teacher.aggregate([
+      { $match: { "slots.student": new mongoose.Types.ObjectId(id) } },
+      { $unwind: "$slots" },
+      { $match: { "slots.student": new mongoose.Types.ObjectId(id) } },
+      {
+        $project: {
+          teacherId: "$_id",
+          firstName: 1,
+          lastName: 1,
+          department: 1,
+          roomNumber: 1,
+          slotId: "$slots._id",
+          time: "$slots.time",
+          status: "$slots.status"
+        }
+      },
+      { $sort: { time: 1 } }
+    ]);
+
+    return res.status(200).json({ bookedSlots });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server error' });
+  }
 });
 
 router.post("/cancelSlot", loginAuth, async (req, res) => {
-    try {
-        const { teacherId, slotId } = req.body;
-        const userId = req.user.userId;
+  try {
+    const { teacherId, slotId } = req.body;
+    const userId = req.user.userId;
 
-        // Ensure the student or teacher can cancel it (simplification: if it matches, clear it)
-        const update = await Teacher.updateOne(
-            { _id: teacherId, "slots._id": slotId },
-            {
-                $set: {
-                    "slots.$.student": null,
-                    "slots.$.status": "available"
-                }
-            }
-        );
-
-        if (update.modifiedCount === 0) {
-            return res.status(400).json({ message: "Could not cancel slot. Invalid IDs." });
+    // Ensure the student or teacher can cancel it (simplification: if it matches, clear it)
+    const update = await Teacher.updateOne(
+      { _id: teacherId, "slots._id": slotId },
+      {
+        $set: {
+          "slots.$.student": null,
+          "slots.$.status": "available"
         }
+      }
+    );
 
-        return res.status(200).json({ message: "Slot canceled successfully" });
-    } catch (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Server error" });
+    if (update.modifiedCount === 0) {
+      return res.status(400).json({ message: "Could not cancel slot. Invalid IDs." });
     }
+
+    return res.status(200).json({ message: "Slot canceled successfully" });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 router.post("/addSlot", loginAuth, async function (req, res) {
@@ -192,19 +162,52 @@ router.post("/addSlot", loginAuth, async function (req, res) {
   }
 });
 // Updating slot timing
-router.put("/updateSlot/:id", async (req, res) => {
+router.put("/updateSlot/:id", loginAuth, async (req, res) => {
   try {
+    const teacherId = req.user.userId;
+    const slotId = req.params.id;
     const { time } = req.body;
-    const slot = await Slot.findByIdAndUpdate(
-      req.params.id,
-      { time },
+
+    // Update nested slot within teacher document
+    const result = await Teacher.findOneAndUpdate(
+      { _id: teacherId, "slots._id": slotId },
+      { $set: { "slots.$.time": new Date(time) } },
       { new: true }
     );
-    res.status(200).json(slot);
+
+    if (!result) {
+      return res.status(404).json({ error: "Slot not found or unauthorized" });
+    }
+
+    res.status(200).json({ message: "Slot updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Delete a slot
+router.delete("/deleteSlot/:id", loginAuth, async (req, res) => {
+  try {
+    const teacherId = req.user.userId;
+    const slotId = req.params.id;
+
+    // Remove slot from teacher's slots array
+    const result = await Teacher.findOneAndUpdate(
+      { _id: teacherId },
+      { $pull: { slots: { _id: slotId } } },
+      { new: true }
+    );
+
+    if (!result) {
+      return res.status(404).json({ error: "Teacher not found or unauthorized" });
+    }
+
+    res.status(200).json({ message: "Slot deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 
 module.exports = router

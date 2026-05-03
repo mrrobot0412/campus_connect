@@ -17,6 +17,8 @@ app.get("/test",async function(req,res){
 app.listen(ServerConfig.PORT, async () => {
     //mongoDB connection
     await ConnectDB()
+    // Initialize background worker
+    require("./src/queues/otpWorker");
     console.log(`Server is up at ${ServerConfig.PORT} `);
   });
   

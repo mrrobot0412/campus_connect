@@ -55,6 +55,8 @@ import Signup from "./components/Sign";
 import Login from "./components/Login";
 import Hero from "./components/Hero";
 import DashTeacher from "./components/DashTeacher";
+import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 export default function App() {
   return (
@@ -64,6 +66,8 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/teacher_dashboard" element={<DashTeacher />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );
 }

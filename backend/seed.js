@@ -19,9 +19,9 @@ const seedTeachers = async () => {
 
         const dummyTeachers = [
             {
-                firstName: 'Alice',
-                lastName: 'Smith',
-                email: 'alice.smith@thapar.edu',
+                firstName: 'Ananya',
+                lastName: 'Sharma',
+                email: 'ananya.sharma@thapar.edu',
                 department: 'CSED',
                 roomNumber: 'C-301',
                 specialization: ['Machine Learning', 'Artificial Intelligence', 'Data Science'],
@@ -37,9 +37,9 @@ const seedTeachers = async () => {
                 ]
             },
             {
-                firstName: 'Bob',
-                lastName: 'Johnson',
-                email: 'bob.johnson@thapar.edu',
+                firstName: 'Rahul',
+                lastName: 'Gupta',
+                email: 'rahul.gupta@thapar.edu',
                 department: 'ECED',
                 roomNumber: 'E-205',
                 specialization: ['VLSI Design', 'Embedded Systems'],
@@ -51,9 +51,9 @@ const seedTeachers = async () => {
                 ]
             },
             {
-                firstName: 'Charlie',
-                lastName: 'Brown',
-                email: 'charlie.brown@thapar.edu',
+                firstName: 'Vikram',
+                lastName: 'Singh',
+                email: 'vikram.singh@thapar.edu',
                 department: 'CSED',
                 roomNumber: 'C-405',
                 specialization: ['Cybersecurity', 'Network Security', 'Cryptography'],
@@ -68,9 +68,9 @@ const seedTeachers = async () => {
                 ]
             },
             {
-                firstName: 'Diana',
-                lastName: 'Prince',
-                email: 'diana.prince@thapar.edu',
+                firstName: 'Priya',
+                lastName: 'Patel',
+                email: 'priya.patel@thapar.edu',
                 department: 'ECED',
                 roomNumber: 'E-112',
                 specialization: ['Signal Processing', 'Wireless Communications', '5G Networks'],
@@ -85,9 +85,9 @@ const seedTeachers = async () => {
                 ]
             },
             {
-                firstName: 'Evan',
-                lastName: 'Wright',
-                email: 'evan.wright@thapar.edu',
+                firstName: 'Karthik',
+                lastName: 'Iyer',
+                email: 'karthik.iyer@thapar.edu',
                 department: 'CSED',
                 roomNumber: 'C-210',
                 specialization: ['Web Development', 'Cloud Computing', 'Distributed Systems'],
