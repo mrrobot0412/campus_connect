@@ -239,7 +239,7 @@ npm run dev
 
 ### Backend (.env)
 ```
-MONGOURI=mongodb://localhost:27017/campusconnect
+MONGOURI=t
 PORT=8000
 JWT_SECRET=your-secret-key
 gmail_key=your-gmail-app-password

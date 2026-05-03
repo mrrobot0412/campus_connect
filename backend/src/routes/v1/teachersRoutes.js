@@ -89,25 +89,61 @@ router.get("/searchBySpecialization", async (req, res) => {
 });
 
 router.get("/getTeachers", async (req, res) => {
-  const { department, search } = req.query;
+  const { department, search, type } = req.query;
+  console.log("--- SEARCH REQUEST START ---");
+  console.log("Query Params:", JSON.stringify(req.query));
+  
   let query = {};
 
-  if (department) query.department = department;
-
-  if (search) {
-    // Allows matching "Alice Smith" or single names case-insensitively
-    const searchRegex = new RegExp(search.split(' ').join('.*'), 'i');
-    query.$or = [
-      { firstName: searchRegex },
-      { lastName: searchRegex },
-      { $expr: { $regexMatch: { input: { $concat: ["$firstName", " ", "$lastName"] }, regex: search, options: "i" } } }
-    ];
+  if (department && department !== "") {
+    query.department = department;
   }
 
+  if (search && search.trim() !== "") {
+    const s = search.trim();
+    const regex = { $regex: s, $options: "i" };
+
+    switch (type) {
+      case "specialization":
+        query.specialization = regex;
+        break;
+      case "paper":
+        query["papers.title"] = regex;
+        break;
+      case "availability":
+        query["slots"] = { $elemMatch: { status: "available" } };
+        break;
+      default: // smart search
+        query.$or = [
+          { $text: { $search: s } },
+          { firstName: regex },
+          { lastName: regex },
+          { specialization: regex },
+          { "papers.title": regex }
+        ];
+        break;
+    }
+  } else if (type === "availability") {
+    query["slots"] = { $elemMatch: { status: "available" } };
+  }
+
+  console.log("Final MongoDB Query:", JSON.stringify(query, null, 2));
+
   try {
-    const teachers = await Teacher.find(query);
+    let teachers;
+    if (search && (type === "general" || !type)) {
+      // Use projection to include the search score and sort by it
+      teachers = await Teacher.find(query, { score: { $meta: "textScore" } })
+        .sort({ score: { $meta: "textScore" } })
+        .select("-password");
+    } else {
+      teachers = await Teacher.find(query).select("-password");
+    }
+    console.log(`Results Found: ${teachers.length}`);
+    console.log("--- SEARCH REQUEST END ---");
     res.json({ teachers });
   } catch (err) {
+    console.error("Search Error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });

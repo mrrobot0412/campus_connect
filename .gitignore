@@ -1,0 +1,25 @@
+# Documentation and Roadmaps
+hld_impl.md
+SEARCH_ROADMAP.md
+SEARCH_SYSTEM.md
+backend/OTP_ARCHITECTURE.md
+otp_architecture_comparison.md
+DEPLOYMENT_GUIDE.md
+improvements.md
+GEMINI_STATUS.md
+backend.log
+*.log
+
+# Dependencies
+node_modules/
+dist/
+
+# OS files
+.DS_Store
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

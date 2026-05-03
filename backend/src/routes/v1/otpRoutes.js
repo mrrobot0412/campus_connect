@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 const EmailOtp = require("../../models/EmailOtp");
 const otpAuth = require("../../middlewares/otpMiddleware");
 const { body, validationResult } = require("express-validator");
-const { sendOtp } = require("../../utils/otpHelper");
+const { addOtpToQueue } = require("../../queues/otpQueue");
 const { JWT_SECRET } = require("../../config/server-config");
 const { otpLimiter } = require("../../middlewares/rateLimiter");
 
@@ -42,14 +42,12 @@ router.post(
         await EmailOtp.findByIdAndUpdate(user._id, { OTP: otp, createdAt: new Date() });
       }
 
-      const isSent = await sendOtp({ email, otp });
+      // Add to background queue instead of waiting for SMTP
+      await addOtpToQueue({ email, otp });
 
-      if (isSent) {
-        const data = { user: { email: email } };
-        const authtoken = jwt.sign(data, JWT_SECRET);
-        return res.status(200).json({ authtoken: authtoken });
-      }
-      return res.status(500).json({ message: "Failed to send OTP email" });
+      const data = { user: { email: email } };
+      const authtoken = jwt.sign(data, JWT_SECRET);
+      return res.status(200).json({ authtoken: authtoken });
     } catch (e) {
       console.log(e);
       return res.status(500).json({ message: "Internal server error" });

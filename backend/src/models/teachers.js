@@ -10,6 +10,11 @@ const teacherSchema = new mongoose.Schema(
       match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
       unique: true,
     },
+    phone: {
+      type: String,
+      default: null,
+      match: [/^\d{10}$/, "Please use a valid phone number"],
+    },
     department: {
       type: String,
       enum: ["CSED", "ECED"],
@@ -60,7 +65,25 @@ const teacherSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-teacherSchema.index({ "papers.title": "text", "papers.journal": "text" });
+teacherSchema.index(
+  { 
+    firstName: "text", 
+    lastName: "text", 
+    specialization: "text", 
+    "papers.title": "text", 
+    "papers.journal": "text" 
+  },
+  {
+    weights: {
+      firstName: 10,
+      lastName: 10,
+      specialization: 5,
+      "papers.title": 2,
+      "papers.journal": 1
+    },
+    name: "TeacherSearchIndex"
+  }
+);
 teacherSchema.index({ department: 1, specialization: 1 });
 teacherSchema.index({ department: 1, firstName: 1, lastName: 1 });
 const Teacher = mongoose.model("teacher", teacherSchema);

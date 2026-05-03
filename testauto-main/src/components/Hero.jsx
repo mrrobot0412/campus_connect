@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ChevronDown, Search, BookOpen, Users, Clock, Mail } from "lucide-react";
 import { FiUser } from "react-icons/fi";
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../config';
 
 const departments = ["CSED", "ECED"];
 
@@ -24,7 +25,7 @@ const Hero = () => {
     try {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
-      const response = await fetch("http://localhost:8000/api/v1/slotsRoutes/retriveSlots", {
+      const response = await fetch("${API_BASE_URL}/api/v1/slotsRoutes/retriveSlots", {
         headers: { "auth-token": storedToken }
       });
       if (response.ok) {
@@ -50,7 +51,7 @@ const Hero = () => {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
       
-      const response = await fetch("http://localhost:8000/api/v1/loginRoutes/student/profile", {
+      const response = await fetch("${API_BASE_URL}/api/v1/loginRoutes/student/profile", {
         headers: {
           "auth-token": storedToken
         }
@@ -67,38 +68,14 @@ const Hero = () => {
     }
   };
 
-  const handleSearch = async () => {
-    if (!department) return;
-    setSearchTerm("");
-    setSearchType("");
+  const handleSearch = async (overrideType) => {
+    // Determine the type to use: either the one passed in (when clicking a button) or the state
+    const currentType = overrideType || searchType;
     
     setIsLoading(true);
     try {
-      let url = "http://localhost:8000/api/v1/teachersRoutes/getTeachersByDept?";
-      if (searchTerm.trim()) url += `search=${encodeURIComponent(searchTerm)}`;
-      if (department) url += `${searchTerm.trim() ? "&" : ""}department=${encodeURIComponent(department)}`;
-      
-      const res = await fetch(url);
-      const data = await res.json();
-      setSearchResults(data.teachers || []);
-    } catch (error) {
-      console.error("Search error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSpecialSearch = async () => {
-    if (!searchTerm.trim()) return;
-    setIsLoading(true);
-    try {
-      let url = "http://localhost:8000/api/v1/teachersRoutes/";
-      switch (searchType) {
-        case "specialization": url += `searchBySpecialization?q=${encodeURIComponent(searchTerm)}`; break;
-        case "paper": url += `searchByPaper?q=${encodeURIComponent(searchTerm)}`; break;
-        case "availability": url += `searchByAvailability?date=${encodeURIComponent(searchTerm)}`; break;
-        default: url += `getTeachers?search=${encodeURIComponent(searchTerm)}`;
-      }
+      let url = `${API_BASE_URL}/api/v1/teachersRoutes/getTeachers?type=${currentType}`;
+      if (searchTerm.trim()) url += `&search=${encodeURIComponent(searchTerm)}`;
       if (department) url += `&department=${encodeURIComponent(department)}`;
       
       const res = await fetch(url);
@@ -112,12 +89,18 @@ const Hero = () => {
   };
 
   useEffect(() => {
-    if (department) handleSearch();
-  }, [department]);
+    // Debounce search while typing
+    const timer = setTimeout(() => {
+      handleSearch();
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [searchTerm, department, searchType]);
 
-  useEffect(() => {
-    if (searchTerm || searchType) handleSpecialSearch();
-  }, [searchTerm, searchType]);
+  // Handle typing without resetting the filter type
+  const handleInputChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   const handleBookSlot = async (teacherId, slotId) => {
     if (!token) {
@@ -126,7 +109,7 @@ const Hero = () => {
     }
     
     try {
-      const res = await fetch("http://localhost:8000/api/v1/slotsRoutes/bookSlots", {
+      const res = await fetch("${API_BASE_URL}/api/v1/slotsRoutes/bookSlots", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -138,8 +121,7 @@ const Hero = () => {
       if (res.ok) {
         alert("Slot booked successfully!");
         setSelectedTeacher(null);
-        if (searchType === "general") handleSearch();
-        else handleSpecialSearch();
+        handleSearch(); // Refresh current view
         fetchMyAppointments();
       } else {
         alert(data.error || "Failed to book slot");
@@ -152,7 +134,7 @@ const Hero = () => {
 
   const handleTeacherClick = async (teacherId) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/teachersRoutes/getTeacher/${teacherId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/getTeacher/${teacherId}`);
       const data = await res.json();
       if (res.ok) setSelectedTeacher(data.teacher);
       else alert(data.error || "Failed to load teacher details");
@@ -211,17 +193,24 @@ const Hero = () => {
                 type="text"
                 placeholder="Search teachers, subjects, specializations..."
                 value={searchTerm}
-                onChange={(e) => { setSearchTerm(e.target.value); setSearchType("general"); }}
+                onChange={handleInputChange}
                 className="w-full pl-14 pr-4 py-4 bg-slate-50/80 border border-slate-200/80 rounded-2xl text-slate-800 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
               />
             </div>
             
+            <button
+              onClick={() => handleSearch()}
+              className="px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl hover:bg-indigo-600 transition-all shadow-lg hover:-translate-y-0.5 whitespace-nowrap"
+            >
+              Search Now
+            </button>
+            
             <div className="relative inline-block text-left w-full sm:w-auto shrink-0">
               <button
-                className="inline-flex justify-between items-center w-full sm:w-48 px-5 py-4 bg-slate-900 text-white font-bold border border-transparent rounded-2xl hover:bg-indigo-600 transition-all shadow-lg hover:-translate-y-0.5"
+                className="inline-flex justify-between items-center w-full sm:w-48 px-5 py-4 bg-white text-slate-700 font-bold border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               >
-                {department || "Department"} <ChevronDown className="ml-2 text-indigo-200" size={18} />
+                {department || "Department"} <ChevronDown className="ml-2 text-slate-400" size={18} />
               </button>
 
               {dropdownOpen && (
@@ -248,7 +237,7 @@ const Hero = () => {
           
           <div className="mt-5 flex flex-wrap gap-2.5 justify-center sm:justify-start">
             <button
-              onClick={() => { setSearchType("specialization"); handleSpecialSearch(); }}
+              onClick={() => setSearchType("specialization")}
               className={`px-5 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 transition-all ${
                 searchType === "specialization" ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               }`}
@@ -256,7 +245,7 @@ const Hero = () => {
               <Users size={16} /> By Specialization
             </button>
             <button
-              onClick={() => { setSearchType("paper"); handleSpecialSearch(); }}
+              onClick={() => setSearchType("paper")}
               className={`px-5 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 transition-all ${
                 searchType === "paper" ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               }`}
@@ -264,13 +253,21 @@ const Hero = () => {
               <BookOpen size={16} /> By Publication
             </button>
             <button
-              onClick={() => { setSearchType("availability"); handleSpecialSearch(); }}
+              onClick={() => setSearchType("availability")}
               className={`px-5 py-2.5 text-sm font-bold rounded-xl flex items-center gap-2 transition-all ${
                 searchType === "availability" ? "bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200 shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-900"
               }`}
             >
               <Clock size={16} /> By Availability
             </button>
+            {searchType !== "general" && (
+              <button
+                onClick={() => setSearchType("general")}
+                className="px-5 py-2.5 text-sm font-bold rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all border border-slate-200"
+              >
+                Clear Filter
+              </button>
+            )}
           </div>
         </div>
 
@@ -493,7 +490,7 @@ const Hero = () => {
                               onClick={async () => {
                                 if(window.confirm("Are you sure you want to cancel this appointment?")) {
                                   try {
-                                    const res = await fetch("http://localhost:8000/api/v1/slotsRoutes/cancelSlot", {
+                                    const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/cancelSlot`, {
                                       method: "POST",
                                       headers: { "Content-Type": "application/json", "auth-token": token },
                                       body: JSON.stringify({ teacherId: apt.teacherId, slotId: apt.slotId })
