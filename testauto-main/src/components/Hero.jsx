@@ -25,7 +25,7 @@ const Hero = () => {
     try {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
-      const response = await fetch("${API_BASE_URL}/api/v1/slotsRoutes/retriveSlots", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/retriveSlots`, {
         headers: { "auth-token": storedToken }
       });
       if (response.ok) {
@@ -51,7 +51,7 @@ const Hero = () => {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
       
-      const response = await fetch("${API_BASE_URL}/api/v1/loginRoutes/student/profile", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/loginRoutes/student/profile`, {
         headers: {
           "auth-token": storedToken
         }
@@ -109,7 +109,7 @@ const Hero = () => {
     }
     
     try {
-      const res = await fetch("${API_BASE_URL}/api/v1/slotsRoutes/bookSlots", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/bookSlots`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

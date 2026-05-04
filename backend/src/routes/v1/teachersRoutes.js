@@ -193,10 +193,11 @@ router.post(
 router.put("/updateContact", loginAuth, async (req, res) => {
   try {
     const teacherId = req.user.userId;
-    const { contact, roomNumber, email } = req.body;
+    const { phone, showPhone, roomNumber, email } = req.body;
 
     const updateData = {};
-    if (contact) updateData.contact = contact;
+    if (phone !== undefined) updateData.phone = phone;
+    if (showPhone !== undefined) updateData.showPhone = showPhone;
     if (roomNumber) updateData.roomNumber = roomNumber;
     if (email) updateData.email = email;
 

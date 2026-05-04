@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChevronDown, Search, BookOpen, Users, Clock, Mail } from "lucide-react";
 import { FiUser } from "react-icons/fi";
+import { API_BASE_URL } from "../config";
 
 const departments = ["CSED", "ECED"];
 
@@ -29,7 +30,7 @@ const Hero = () => {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
       
-      const response = await fetch("http://localhost:8000/api/v1/loginRoutes/student/profile", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/loginRoutes/student/profile`, {
         headers: {
           "auth-token": storedToken
         }
@@ -50,7 +51,7 @@ const Hero = () => {
     if (!searchTerm.trim() && !department) return;
     setIsLoading(true);
     try {
-      let url = "http://localhost:8000/api/v1/teachersRoutes/getTeachers?";
+      let url = `${API_BASE_URL}/api/v1/teachersRoutes/getTeachers?`;
       if (searchTerm.trim()) url += `search=${encodeURIComponent(searchTerm)}`;
       if (department) url += `${searchTerm.trim() ? "&" : ""}department=${encodeURIComponent(department)}`;
       
@@ -68,7 +69,7 @@ const Hero = () => {
     if (!searchTerm.trim()) return;
     setIsLoading(true);
     try {
-      let url = "http://localhost:8000/api/v1/teachersRoutes/";
+      let url = `${API_BASE_URL}/api/v1/teachersRoutes/`;
       switch (type) {
         case "specialization": url += `searchBySpecialization?q=${encodeURIComponent(searchTerm)}`; break;
         case "paper": url += `searchByPaper?q=${encodeURIComponent(searchTerm)}`; break;
@@ -93,7 +94,7 @@ const Hero = () => {
       return;
     }
     try {
-      const res = await fetch("http://localhost:8000/api/v1/slots/bookSlots", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slots/bookSlots`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -118,7 +119,7 @@ const Hero = () => {
 
   const handleTeacherClick = async (teacherId) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/teachersRoutes/getTeacher/${teacherId}`);
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/getTeacher/${teacherId}`);
       const data = await res.json();
       if (res.ok) {
         setSelectedTeacher(data.teacher);

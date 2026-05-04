@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Users, BookOpen, Clock, Settings, User } from "lucide-react";
+import { API_BASE_URL } from "../config";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
@@ -114,7 +115,7 @@ const DashTeacher = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:8000/api/v1/teachersRoutes/profile", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/profile`, {
         headers: { "auth-token": token, "Content-Type": "application/json" },
       });
       const data = await res.json();
@@ -136,7 +137,7 @@ const DashTeacher = () => {
     e.preventDefault();
     if (!newPaper.title) return;
     try {
-      const res = await fetch("http://localhost:8000/api/v1/teachersRoutes/addResearchPaper", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/addResearchPaper`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify(newPaper),
@@ -157,7 +158,7 @@ const DashTeacher = () => {
     if (!newSpecialization) return;
     const special = newSpecialization.split(",");
     try {
-      const res = await fetch("http://localhost:8000/api/v1/teachersRoutes/addSpecialization", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/addSpecialization`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({ specialization: special }),
@@ -175,7 +176,7 @@ const DashTeacher = () => {
 
   const handleDeletePaper = async (title) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/teachersRoutes/deleteResearchPaper/${encodeURIComponent(title)}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/deleteResearchPaper/${encodeURIComponent(title)}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", "auth-token": token },
       });
@@ -195,7 +196,7 @@ const DashTeacher = () => {
     if (!newSlot.date || !newSlot.time) return alert("Select both date and time");
     const isoTime = `${newSlot.date}T${newSlot.time}:00.000`;
     try {
-      const res = await fetch("http://localhost:8000/api/v1/slotsRoutes/addSlot", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/addSlot`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({ time: isoTime }),
@@ -226,7 +227,7 @@ const DashTeacher = () => {
     currentDate.setHours(hours, minutes, 0, 0);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/slotsRoutes/updateSlot/${editSlotId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/updateSlot/${editSlotId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({ time: currentDate.toISOString() }),
@@ -248,7 +249,7 @@ const DashTeacher = () => {
 
   const handleDeleteSlot = async (slotId) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/v1/slotsRoutes/deleteSlot/${slotId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/deleteSlot/${slotId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", "auth-token": token },
       });
@@ -272,11 +273,12 @@ const DashTeacher = () => {
   const handleUpdateContact = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/api/v1/teachersRoutes/updateContact", {
+      const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/updateContact`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({
-          contact: profile.contact,
+          phone: profile.phone,
+          showPhone: profile.showPhone,
           roomNumber: profile.roomNumber,
           email: profile.email,
         }),
@@ -393,7 +395,18 @@ const DashTeacher = () => {
                   <form className="space-y-5" onSubmit={handleUpdateContact}>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">Phone</label>
-                      <input type="text" name="contact" value={profile.contact || ""} onChange={handleContactChange} className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 font-medium text-slate-900 transition-all"/>
+                      <input type="text" name="phone" value={profile.phone || ""} onChange={handleContactChange} className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 font-medium text-slate-900 transition-all" placeholder="+91..." />
+                    </div>
+                    <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                      <input 
+                        type="checkbox" 
+                        id="showPhone" 
+                        name="showPhone" 
+                        checked={profile.showPhone || false} 
+                        onChange={(e) => setProfile({ ...profile, showPhone: e.target.checked })}
+                        className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      />
+                      <label htmlFor="showPhone" className="text-sm font-bold text-slate-700 cursor-pointer">Show phone number to students</label>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-2">Room / Cabin</label>
@@ -412,7 +425,12 @@ const DashTeacher = () => {
                   <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-slate-100 group">
                       <div className="w-1/3 font-bold text-slate-400 text-sm tracking-wide uppercase">Phone</div>
-                      <div className="w-2/3 text-slate-900 font-semibold text-lg">{profile.contact || "—"}</div>
+                      <div className="w-2/3 flex items-center gap-2">
+                        <span className="text-slate-900 font-semibold text-lg">{profile.phone || "—"}</span>
+                        <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold ${profile.showPhone ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                          {profile.showPhone ? 'Public' : 'Hidden'}
+                        </span>
+                      </div>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center py-4 border-b border-slate-100">
                       <div className="w-1/3 font-bold text-slate-400 text-sm tracking-wide uppercase">Workspace</div>

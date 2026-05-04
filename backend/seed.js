@@ -29,6 +29,8 @@ const seedTeachers = async () => {
                     { title: 'Deep Learning Optimization in 2024', journal: 'IEEE Transactions' },
                     { title: 'Generative Models for Code Generation', journal: 'ACM Computing Surveys' }
                 ],
+                phone: '+919876543210',
+                showPhone: true,
                 password: passwordHash,
                 slots: [
                     { time: new Date(Date.now() + 86400000), status: 'available' }, // Tomorrow
@@ -44,6 +46,8 @@ const seedTeachers = async () => {
                 roomNumber: 'E-205',
                 specialization: ['VLSI Design', 'Embedded Systems'],
                 papers: [{ title: 'FPGA Power Optimization', journal: 'ACM' }],
+                phone: '+919123456789',
+                showPhone: false,
                 password: passwordHash,
                 slots: [
                     { time: new Date(Date.now() + 86400000), status: 'available' },
@@ -61,6 +65,8 @@ const seedTeachers = async () => {
                     { title: 'Zero Trust Architecture', journal: 'Springer' }, 
                     { title: 'Network Intrusions Detection', journal: 'IEEE' }
                 ],
+                phone: '+919988776655',
+                showPhone: true,
                 password: passwordHash,
                 slots: [
                     { time: new Date(Date.now() + 259200000), status: 'available' }, // 3 days from now
@@ -78,6 +84,8 @@ const seedTeachers = async () => {
                     { title: '5G Hardware Innovations', journal: 'IEEE' },
                     { title: 'Digital Signal Analysis', journal: 'Springer' }
                 ],
+                phone: '+919911223344',
+                showPhone: true,
                 password: passwordHash,
                 slots: [
                     { time: new Date(Date.now() + 100000000), status: 'available' },
@@ -92,6 +100,8 @@ const seedTeachers = async () => {
                 roomNumber: 'C-210',
                 specialization: ['Web Development', 'Cloud Computing', 'Distributed Systems'],
                 papers: [{ title: 'Microservices vs Monoliths', journal: 'ACM' }],
+                phone: '+919900887766',
+                showPhone: false,
                 password: passwordHash,
                 slots: [
                     { time: new Date(Date.now() + 500000000), status: 'available' }

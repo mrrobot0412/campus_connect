@@ -193,7 +193,7 @@ email, OTP (6-digit), createdAt (TTL index, 5 min expiry)
 1. **Security**: Several endpoints lack authentication (`PUT /updateSlot/:id`, `POST /addTeacher`, `GET /getTeacher/:id`)
 2. **Concurrency**: Slot booking uses non-atomic operations — possible double-booking under load
 3. **Missing Endpoint**: `DELETE /deleteSlot/:id` called by frontend but not implemented
-4. **Hardcoded URLs**: Frontend hardcodes `http://localhost:8000`
+4. **Environment-driven URLs**: Frontend now reads `VITE_API_URL`; set it before production build
 5. **Duplicate Code**: `teachersRoutes.js` has duplicate `addTeacher` route definitions
 6. **No Rate Limiting**: OTP and login endpoints vulnerable to brute force
 7. **No Password Reset**: Forgot password not implemented
@@ -233,6 +233,25 @@ npm install
 npm run dev
 ```
 
+### Production Deploy
+Use two separate deploy targets.
+
+Backend:
+```bash
+cd backend
+npm install
+npm start
+```
+Set `MONGOURI`, `JWT_SECRET`, `gmail_user`, `gmail_key`, `REDIS_URL` or `REDIS_HOST`/`REDIS_PORT`, and `FRONTEND_URLS` to your frontend origin.
+
+Frontend:
+```bash
+cd testauto-main
+npm install
+npm run build
+```
+Set `VITE_API_URL` to your deployed backend URL before building.
+
 ---
 
 ## Environment Variables
@@ -243,4 +262,5 @@ MONGOURI=t
 PORT=8000
 JWT_SECRET=your-secret-key
 gmail_key=your-gmail-app-password
+FRONTEND_URLS=https://your-frontend-domain.com
 ```

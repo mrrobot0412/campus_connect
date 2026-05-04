@@ -13,7 +13,11 @@ const teacherSchema = new mongoose.Schema(
     phone: {
       type: String,
       default: null,
-      match: [/^\d{10}$/, "Please use a valid phone number"],
+      match: [/^(?:\+91|0)?[6-9]\d{9}$/, "Please use a valid phone number"],
+    },
+    showPhone: {
+      type: Boolean,
+      default: false,
     },
     department: {
       type: String,
