@@ -1,12 +1,13 @@
 const express = require("express");
 const loginAuth = require("../../middlewares/authMiddleware");
+const { requireRole } = require("../../middlewares/authMiddleware");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const Student = require("../../models/student")
 const Teacher = require("../../models/teachers")
-const { JWT_SECRET } = require("../../config/server-config")
+const { JWT_SECRET, ADMIN_EMAILS } = require("../../config/server-config")
 
 
 
@@ -42,7 +43,7 @@ const { JWT_SECRET } = require("../../config/server-config")
 
 
 
-router.get("/profile", loginAuth, async (req, res) => {
+router.get("/profile", loginAuth, requireRole("teacher", "admin"), async (req, res) => {
   try {
     const teacher = await Teacher.findById(req.user.userId)
       .select("-password")
@@ -59,7 +60,7 @@ router.get("/profile", loginAuth, async (req, res) => {
 
 router.get("/getTeacher/:id", async (req, res) => {
   try {
-    const teacher = await Teacher.findById(req.params.id);
+    const teacher = await Teacher.findById(req.params.id).select("-password");
     if (!teacher) {
       return res.status(404).json({ error: "Teacher not found" });
     }
@@ -81,7 +82,7 @@ router.get("/searchBySpecialization", async (req, res) => {
       query.department = department;
     }
 
-    const teachers = await Teacher.find(query);
+    const teachers = await Teacher.find(query).select("-password");
     res.json({ teachers });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
@@ -114,8 +115,8 @@ router.get("/getTeachers", async (req, res) => {
         query["slots"] = { $elemMatch: { status: "available" } };
         break;
       default: // smart search
+        // Regex fallback avoids Mongo $text + non-indexed $or query planner errors.
         query.$or = [
-          { $text: { $search: s } },
           { firstName: regex },
           { lastName: regex },
           { specialization: regex },
@@ -131,11 +132,21 @@ router.get("/getTeachers", async (req, res) => {
 
   try {
     let teachers;
-    if (search && (type === "general" || !type)) {
-      // Use projection to include the search score and sort by it
-      teachers = await Teacher.find(query, { score: { $meta: "textScore" } })
+    if (search && search.trim() !== "" && (type === "general" || !type)) {
+      const s = search.trim();
+      const departmentFilter = department && department !== "" ? { department } : {};
+
+      // Use the Mongo text index first, then fall back to regex for partial matches.
+      teachers = await Teacher.find(
+        { ...departmentFilter, $text: { $search: s } },
+        { score: { $meta: "textScore" } }
+      )
         .sort({ score: { $meta: "textScore" } })
         .select("-password");
+
+      if (teachers.length === 0) {
+        teachers = await Teacher.find(query).select("-password");
+      }
     } else {
       teachers = await Teacher.find(query).select("-password");
     }
@@ -150,6 +161,7 @@ router.get("/getTeachers", async (req, res) => {
 router.post(
   "/addResearchPaper",
   loginAuth,
+  requireRole("teacher", "admin"),
   [
     body("title").notEmpty().withMessage("Title is required"),
     body("journal").optional(),
@@ -190,16 +202,15 @@ router.post(
   }
 );
 
-router.put("/updateContact", loginAuth, async (req, res) => {
+router.put("/updateContact", loginAuth, requireRole("teacher", "admin"), async (req, res) => {
   try {
     const teacherId = req.user.userId;
-    const { phone, showPhone, roomNumber, email } = req.body;
+    const { phone, showPhone, roomNumber } = req.body;
 
     const updateData = {};
     if (phone !== undefined) updateData.phone = phone;
     if (showPhone !== undefined) updateData.showPhone = showPhone;
     if (roomNumber) updateData.roomNumber = roomNumber;
-    if (email) updateData.email = email;
 
     const teacher = await Teacher.findByIdAndUpdate(
       teacherId,
@@ -217,7 +228,7 @@ router.put("/updateContact", loginAuth, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-router.delete("/deleteResearchPaper/:title", loginAuth, async (req, res) => {
+router.delete("/deleteResearchPaper/:title", loginAuth, requireRole("teacher", "admin"), async (req, res) => {
   try {
     const teacherId = req.user.userId;
     const title = req.params.title;
@@ -250,6 +261,7 @@ router.delete("/deleteResearchPaper/:title", loginAuth, async (req, res) => {
 router.post(
   "/addSpecialization",
   loginAuth,
+  requireRole("teacher", "admin"),
   [body("specialization").notEmpty().withMessage("Specialization is required")],
   async (req, res) => {
     // Validate input
@@ -315,6 +327,7 @@ router.get("/getTeachersByDept", async (req, res) => {
 router.post(
   "/addTeacher",
   loginAuth,
+  requireRole("admin"),
   [
     body("firstName")
       .isString()
@@ -414,15 +427,19 @@ router.post(
       }
 
       // Generate JWT token
+      const role = ADMIN_EMAILS.includes(teacher.email.toLowerCase()) ? "admin" : "teacher";
+
       const payload = {
         userId: teacher._id,
-        role: "teacher",
+        email: teacher.email,
+        role,
       };
 
       const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
 
       res.json({
         token,
+        role,
         teacher: {
           _id: teacher._id,
           firstName: teacher.firstName,
@@ -438,19 +455,36 @@ router.post(
   }
 );
 
-router.post("/addManyTeachers", async (req, res) => {
+router.post("/addManyTeachers", loginAuth, requireRole("admin"), async (req, res) => {
   try {
     const teachers = req.body.teachers;
 
     if (!Array.isArray(teachers) || teachers.length === 0) {
       return res.status(400).json({ error: "teachers array is required" });
     }
+    if (teachers.some((teacher) => !teacher.password)) {
+      return res.status(400).json({ error: "Every teacher requires a temporary password" });
+    }
 
-    const insertedTeachers = await Teacher.insertMany(teachers, {
+    // Hash imported teacher passwords before saving admin-provided accounts.
+    const teachersWithHashedPasswords = await Promise.all(
+      teachers.map(async (teacher) => ({
+        ...teacher,
+        password: await bcrypt.hash(teacher.password, 10),
+      }))
+    );
+
+    const insertedTeachers = await Teacher.insertMany(teachersWithHashedPasswords, {
       ordered: false,
     });
 
-    res.status(201).json({ message: "Teachers added", insertedTeachers });
+    const safeTeachers = insertedTeachers.map((teacher) => {
+      const teacherObject = teacher.toObject();
+      delete teacherObject.password;
+      return teacherObject;
+    });
+
+    res.status(201).json({ message: "Teachers added", insertedTeachers: safeTeachers });
   } catch (err) {
     res.status(500).json({
       error: "Error inserting teachers",
@@ -472,7 +506,7 @@ router.get("/searchByPaper", async (req, res) => {
       query["papers.title"] = { $regex: q, $options: "i" };
     }
 
-    const teachers = await Teacher.find(query);
+    const teachers = await Teacher.find(query).select("-password");
     res.json({ teachers });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
@@ -489,7 +523,7 @@ router.get("/searchByAvailability", async (req, res) => {
   }
 
   try {
-    const teachers = await Teacher.find(query);
+    const teachers = await Teacher.find(query).select("-password");
     res.json({ teachers });
   } catch (err) {
     console.error(err);

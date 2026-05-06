@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Users, BookOpen, Clock, Settings, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 
 const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -109,6 +110,7 @@ const DashTeacher = () => {
   const [editSlotId, setEditSlotId] = useState(null);
   const [editSlotTime, setEditSlotTime] = useState("");
   const [activeTab, setActiveTab] = useState("profile");
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("auth-token");
 
@@ -118,6 +120,12 @@ const DashTeacher = () => {
       const res = await fetch(`${API_BASE_URL}/api/v1/teachersRoutes/profile`, {
         headers: { "auth-token": token, "Content-Type": "application/json" },
       });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("auth-token");
+        localStorage.removeItem("user-role");
+        navigate("/login");
+        return;
+      }
       const data = await res.json();
       setProfile(data.teacher);
       setAvailableSlots(data.teacher.slots || []);
@@ -130,8 +138,14 @@ const DashTeacher = () => {
   };
 
   useEffect(() => {
+    const role = localStorage.getItem("user-role");
+    // Keep students out of the teacher dashboard UI.
+    if (role === "student") {
+      navigate("/dash");
+      return;
+    }
     fetchData();
-  }, []);
+  }, [navigate]);
 
   const handleAddPaper = async (e) => {
     e.preventDefault();
@@ -196,7 +210,7 @@ const DashTeacher = () => {
     if (!newSlot.date || !newSlot.time) return alert("Select both date and time");
     const isoTime = `${newSlot.date}T${newSlot.time}:00.000`;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/addSlot`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slots/addSlot`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({ time: isoTime }),
@@ -227,7 +241,7 @@ const DashTeacher = () => {
     currentDate.setHours(hours, minutes, 0, 0);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/updateSlot/${editSlotId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slots/updateSlot/${editSlotId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "auth-token": token },
         body: JSON.stringify({ time: currentDate.toISOString() }),
@@ -249,7 +263,7 @@ const DashTeacher = () => {
 
   const handleDeleteSlot = async (slotId) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/deleteSlot/${slotId}`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slots/deleteSlot/${slotId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", "auth-token": token },
       });
@@ -337,7 +351,7 @@ const DashTeacher = () => {
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-extrabold tracking-tight text-slate-900">Campus Connect</h1>
         </div>
-        <button onClick={() => { localStorage.clear(); window.location.href='/login' }} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm">
+        <button onClick={() => { localStorage.removeItem("auth-token"); localStorage.removeItem("user-role"); window.location.href='/login' }} className="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-xl hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm">
           Sign Out
         </button>
       </header>

@@ -1,5 +1,6 @@
 const express = require("express");
 const loginAuth = require("../../middlewares/authMiddleware");
+const { requireRole } = require("../../middlewares/authMiddleware");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
@@ -27,7 +28,7 @@ async function insertSlotIfTimeIsFree(id, time, status) {
 
 
 
-router.post("/bookSlots", loginAuth,
+router.post("/bookSlots", loginAuth, requireRole("student"),
   async function (req, res) {
 
 
@@ -73,7 +74,7 @@ router.post("/bookSlots", loginAuth,
 
 
 
-router.get("/retriveSlots", loginAuth, async function (req, res) {
+router.get("/retriveSlots", loginAuth, requireRole("student"), async function (req, res) {
   try {
     var id = req.user.userId;
     const existingStudent = await Student.findOne({ _id: id });
@@ -109,14 +110,25 @@ router.get("/retriveSlots", loginAuth, async function (req, res) {
   }
 });
 
-router.post("/cancelSlot", loginAuth, async (req, res) => {
+router.post("/cancelSlot", loginAuth, requireRole("student", "teacher", "admin"), async (req, res) => {
   try {
     const { teacherId, slotId } = req.body;
     const userId = req.user.userId;
 
-    // Ensure the student or teacher can cancel it (simplification: if it matches, clear it)
+    // Restrict cancellation to slot owner, owning teacher, or admin.
+    const cancelQuery = {
+      _id: teacherId,
+      "slots._id": slotId,
+    };
+
+    if (req.user.role === "student") {
+      cancelQuery["slots.student"] = userId;
+    } else if (req.user.role === "teacher") {
+      cancelQuery._id = userId;
+    }
+
     const update = await Teacher.updateOne(
-      { _id: teacherId, "slots._id": slotId },
+      cancelQuery,
       {
         $set: {
           "slots.$.student": null,
@@ -136,7 +148,7 @@ router.post("/cancelSlot", loginAuth, async (req, res) => {
   }
 });
 
-router.post("/addSlot", loginAuth, async function (req, res) {
+router.post("/addSlot", loginAuth, requireRole("teacher", "admin"), async function (req, res) {
   try {
     var id = req.user.userId;
     // Check if email already exists
@@ -162,7 +174,7 @@ router.post("/addSlot", loginAuth, async function (req, res) {
   }
 });
 // Updating slot timing
-router.put("/updateSlot/:id", loginAuth, async (req, res) => {
+router.put("/updateSlot/:id", loginAuth, requireRole("teacher", "admin"), async (req, res) => {
   try {
     const teacherId = req.user.userId;
     const slotId = req.params.id;
@@ -186,7 +198,7 @@ router.put("/updateSlot/:id", loginAuth, async (req, res) => {
 });
 
 // Delete a slot
-router.delete("/deleteSlot/:id", loginAuth, async (req, res) => {
+router.delete("/deleteSlot/:id", loginAuth, requireRole("teacher", "admin"), async (req, res) => {
   try {
     const teacherId = req.user.userId;
     const slotId = req.params.id;
