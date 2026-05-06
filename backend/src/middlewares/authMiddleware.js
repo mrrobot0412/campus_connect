@@ -2,7 +2,7 @@ var jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const loginAuth = async (req, res, next) => {
-  // Get the user from the jwt token and add id to req object
+  // Authenticate request using the existing auth-token header.
   try {
       const token = req.header("auth-token");
       if (!token) {
@@ -19,4 +19,17 @@ const loginAuth = async (req, res, next) => {
   }
 };
 
+const requireRole = (...allowedRoles) => {
+  // Authorize authenticated users by role after loginAuth has verified JWT.
+  return (req, res, next) => {
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden: insufficient permissions" });
+    }
+
+    next();
+  };
+};
+
 module.exports = loginAuth;
+module.exports.loginAuth = loginAuth;
+module.exports.requireRole = requireRole;

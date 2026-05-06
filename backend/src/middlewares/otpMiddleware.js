@@ -5,7 +5,6 @@ const otpAuth = async (req, res, next) => {
   // Get the user from the jwt token and add id to req object
   try {
       const token = req.header("auth-token");
-      console.log(token)
       if (!token) {
           return res.status(401).send({ error: "Please authenticate using a valid token" });
         }

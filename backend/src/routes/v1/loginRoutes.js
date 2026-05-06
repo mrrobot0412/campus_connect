@@ -1,11 +1,12 @@
 const express = require("express");
 const loginAuth = require("../../middlewares/authMiddleware");
+const { requireRole } = require("../../middlewares/authMiddleware");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const Student = require("../../models/student")
-const { JWT_SECRET } = require("../../config/server-config");
+const { JWT_SECRET, ADMIN_EMAILS } = require("../../config/server-config");
 const Teacher = require("../../models/teachers");
 const { loginLimiter } = require("../../middlewares/rateLimiter");
 const { sendPasswordResetEmail } = require("../../utils/otpHelper");
@@ -27,7 +28,6 @@ router.post(
   ],
   loginAuth,
   async function name(req, res) {
-    console.log(req.user.verified);
     if (req.user.verified != true) {
       return res.status(401).json({ message: "Email is not verified" });
     }
@@ -77,12 +77,12 @@ router.post("/studentLogin", loginLimiter, async (req, res) => {
 
     // Generate JWT Token
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role: "student" },
       JWT_SECRET,
       { expiresIn: "12h" }
     );
 
-    return res.json({ message: "Login successful", token });
+    return res.json({ message: "Login successful", token, role: "student" });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });
@@ -90,7 +90,7 @@ router.post("/studentLogin", loginLimiter, async (req, res) => {
 });
 
 // Get Student Profile
-router.get("/student/profile", loginAuth, async (req, res) => {
+router.get("/student/profile", loginAuth, requireRole("student"), async (req, res) => {
   try {
     const student = await Student.findOne({ email: req.user.email }).select(
       "-password"
@@ -127,13 +127,16 @@ router.post("/teacherLogin", loginLimiter, async (req, res) => {
     }
 
     // Generate JWT Token
+    // Admin role is assigned only to configured teacher emails.
+    const role = ADMIN_EMAILS.includes(user.email.toLowerCase()) ? "admin" : "teacher";
+
     const token = jwt.sign(
-      { userId: user._id, email: user.email },
+      { userId: user._id, email: user.email, role },
       JWT_SECRET,
       { expiresIn: "12h" }
     );
 
-    return res.json({ message: "Login successful", token });
+    return res.json({ message: "Login successful", token, role });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });

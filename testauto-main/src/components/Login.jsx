@@ -9,7 +9,9 @@ export default function Login() {
 
   useEffect(() => {
     if (localStorage.getItem("auth-token")) {
-      navigate("/dash");
+      // Existing sessions route by stored role; backend still enforces access.
+      const role = localStorage.getItem("user-role");
+      navigate(role === "teacher" || role === "admin" ? "/teacher_dashboard" : "/dash");
     }
   }, [navigate]);
 
@@ -29,8 +31,9 @@ export default function Login() {
       );
 
       localStorage.setItem("auth-token", response.data.token);
+      localStorage.setItem("user-role", response.data.role || (userType === "studentLogin" ? "student" : "teacher"));
 
-      if (userType === "studentLogin") {
+      if (response.data.role === "student" || userType === "studentLogin") {
         navigate("/dash");
       } else {
         navigate("/teacher_dashboard");

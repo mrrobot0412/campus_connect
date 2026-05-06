@@ -42,16 +42,14 @@ export default function Signup() {
     
     axios.request(config)
     .then((response) => {
-      console.log(JSON.stringify(response.data));
       navigate("/login")
     })
     .catch((error) => {
       if(error.response.data.message=="user already exists"){
         alert("user alrady exists")
       }
-      console.log(error);
+      console.error(error);
     });
-    console.log(formData);
   };
 
   const handleEmail =async (e)=>{
@@ -74,16 +72,15 @@ export default function Signup() {
   setToken(response.data.authtoken);
   setOtpVerifyotp(false)
 
-})
-.catch((error) => {
-  console.log(error);
-});
+	})
+	.catch((error) => {
+	  console.error(error);
+	});
 
   }
 
   const handleOtp =async (e)=>{
     e.preventDefault();
-    console.log(formData.otp)
     let data = JSON.stringify({
       "otp": formData.otp
     });
@@ -98,15 +95,14 @@ export default function Signup() {
       },
     data:data}
     axios.request(config)
-.then((response) => {
-  console.log(JSON.stringify(response.data));
-  setToken(response.data.authtoken);
-  setOtpVerified(false)
+	.then((response) => {
+	  setToken(response.data.authtoken);
+	  setOtpVerified(false)
 
-})
-.catch((error) => {
-  console.log(error);
-});
+	})
+	.catch((error) => {
+	  console.error(error);
+	});
 
   }
 

@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const apiRoutes = require("./src/routes");
 const { ServerConfig, ConnectDB } = require("./src/config");
+const { generalLimiter } = require("./src/middlewares/rateLimiter");
 
 const app = express();
 
@@ -10,18 +11,10 @@ const allowedOrigins = (process.env.FRONTEND_URLS || process.env.FRONTEND_URL ||
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const previewOriginPatterns = [
-  /\.vercel\.app$/,
-  /\.netlify\.app$/,
-];
-
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    if (
-      allowedOrigins.some((allowedOrigin) => allowedOrigin === origin) ||
-      previewOriginPatterns.some((pattern) => pattern.test(origin))
-    ) {
+    if (allowedOrigins.some((allowedOrigin) => allowedOrigin === origin)) {
       return callback(null, true);
     }
     return callback(new Error('CORS Policy Error'), false);
@@ -29,8 +22,10 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json())
 app.set("trust proxy", 1);
+app.use(express.json({ limit: "100kb" }))
+// Apply a broad safety limit before route-specific stricter limits.
+app.use(generalLimiter);
 app.use("/api", apiRoutes);
 
 app.get("/test", async function(req, res) {
@@ -40,7 +35,11 @@ app.get("/test", async function(req, res) {
 // Global error handler
 app.use((err, req, res, next) => {
   console.error("Global Error Handler:", err.stack);
-  res.status(500).json({ error: "Internal Server Error", details: err.message });
+  const response = { error: "Internal Server Error" };
+  if (process.env.NODE_ENV !== "production") {
+    response.details = err.message;
+  }
+  res.status(500).json(response);
 });
 
 app.listen(ServerConfig.PORT, async () => {

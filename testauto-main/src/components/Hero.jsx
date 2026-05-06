@@ -25,7 +25,7 @@ const Hero = () => {
     try {
       const storedToken = localStorage.getItem("auth-token");
       if (!storedToken) return;
-      const response = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/retriveSlots`, {
+      const response = await fetch(`${API_BASE_URL}/api/v1/slots/retriveSlots`, {
         headers: { "auth-token": storedToken }
       });
       if (response.ok) {
@@ -39,12 +39,18 @@ const Hero = () => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("auth-token");
+    const role = localStorage.getItem("user-role");
+    // Keep teachers/admins out of the student dashboard UI.
+    if (role === "teacher" || role === "admin") {
+      navigate("/teacher_dashboard");
+      return;
+    }
     if (storedToken) {
       setToken(storedToken);
     }
     fetchUserData();
     fetchMyAppointments();
-  }, []);
+  }, [navigate]);
 
   const fetchUserData = async () => {
     try {
@@ -109,7 +115,7 @@ const Hero = () => {
     }
     
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/bookSlots`, {
+      const res = await fetch(`${API_BASE_URL}/api/v1/slots/bookSlots`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
@@ -146,6 +152,7 @@ const Hero = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("auth-token");
+    localStorage.removeItem("user-role");
     navigate("/login");
   };
 
@@ -490,7 +497,7 @@ const Hero = () => {
                               onClick={async () => {
                                 if(window.confirm("Are you sure you want to cancel this appointment?")) {
                                   try {
-                                    const res = await fetch(`${API_BASE_URL}/api/v1/slotsRoutes/cancelSlot`, {
+                                    const res = await fetch(`${API_BASE_URL}/api/v1/slots/cancelSlot`, {
                                       method: "POST",
                                       headers: { "Content-Type": "application/json", "auth-token": token },
                                       body: JSON.stringify({ teacherId: apt.teacherId, slotId: apt.slotId })

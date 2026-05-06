@@ -46,7 +46,8 @@ router.post(
       await addOtpToQueue({ email, otp });
 
       const data = { user: { email: email } };
-      const authtoken = jwt.sign(data, JWT_SECRET);
+      // OTP verification token is short-lived and only proves email ownership.
+      const authtoken = jwt.sign(data, JWT_SECRET, { expiresIn: "10m" });
       return res.status(200).json({ authtoken: authtoken });
     } catch (e) {
       console.log(e);
@@ -76,7 +77,8 @@ router.post("/verifyotp", otpLimiter, otpAuth, [
     await EmailOtp.findByIdAndDelete(user._id);
 
     const data = { email: email, verified: true };
-    const authtoken = jwt.sign(data, JWT_SECRET);
+    // Registration token is short-lived after OTP succeeds.
+    const authtoken = jwt.sign(data, JWT_SECRET, { expiresIn: "15m" });
     return res.status(200).json({ authtoken: authtoken });
   } catch (error) {
     return res.status(400).json({ error: "Server error" });
